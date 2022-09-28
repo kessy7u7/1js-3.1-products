@@ -2,6 +2,7 @@
 
 const Category = require('./category.class');
 const Product = require('./product.class');
+const Dades = require('./datosIni.json');
 
 // Aquí la clase Store
 
@@ -70,7 +71,7 @@ class Store  {
 
         this.getCategoryById(payload.category);
         this.verificarNumFloat(payload.price);
-        
+
         if (payload.units) {
             this.verificarNumEntero(payload.units);
         }
@@ -157,6 +158,18 @@ class Store  {
             throw `'${numero}' no es un número positivo.`;
         }
         return numero;
+    }
+
+    init() {
+        let categories = Dades.categories;
+        categories.forEach(category => {
+            this.categories.push(new Category(category.id, category.name, category.description));
+        });
+
+        let products = Dades.products;
+        products.forEach(product => {
+            this.products.push(new Product(product.id, product.name, product.category, product.price, product.units));
+        });
     }
 
 }
