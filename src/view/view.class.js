@@ -36,24 +36,37 @@ class View {
     delProduct(product) {
         const productUI = document.getElementById(`prod-${product.id}`);
         productUI.remove();
+        this.printMessage(`Ha sido eliminado el producto: '${product.name}'`, 2);
     }
 
     delCategory(category) {
         const categoryUI = document.getElementById(`cat-${category.id}`);
         categoryUI.remove();
+        this.printMessage(`Ha sido eliminada la categoría: '${category.name}'`, 2);
     }
 
-    printError(err) {
+    printMessage(message, success = 1) {
         const messageUI = document.createElement('div');
-        messageUI.classList = "alert alert-danger alert-dismissible";
+        let bgColor = '';
+        switch(success) {  
+            case 0: 
+                bgColor = 'alert-danger';
+                break;
+            case 1:
+                bgColor = 'alert-success';
+                break;
+            default:
+                bgColor = 'alert-warning';
+                break;
+        }
+        messageUI.classList = "alert alert-dismissible " + bgColor;
         messageUI.setAttribute = ('role', 'alert');
-        messageUI.innerHTML = `
-        ${err}
-		<button type="button" class="btn-close" data-bs-dismiss="alert" 
-        aria-label="Close" onclick="this.parentElement.remove()"></button>
-        `;
+        messageUI.innerHTML = `${message}`;
         const divMessage = document.getElementById('messages');
         divMessage.appendChild(messageUI);
+        setTimeout(function() {
+            messageUI.remove()
+        }, 7000)
     }
 
 }

@@ -20,8 +20,9 @@ class Controller {
             let product = this.store.addProduct(payload);
             this.view.renderNewProduct(product);
             this.view.renderImport(this.store.totalImport());
+            this.view.printMessage(`Se ha añadido el producto: '${payload.name}'.`);
         } catch (err) {
-            this.view.printError(err);
+            this.view.printMessage(err, 0);
         }
     }
 
@@ -32,7 +33,7 @@ class Controller {
             this.view.delProduct(product);
             this.view.renderImport(this.store.totalImport());
         } catch (err) {
-            this.view.printError(err);
+            this.view.printMessage(err, 0);
         }
     }
 
@@ -40,8 +41,9 @@ class Controller {
         try {
             let category = this.store.addCategory(playload.name, playload.desc);
             this.view.renderNewCategory(category);
+            this.view.printMessage(`Se ha añadido la categoría: '${category.name}'.`);
         } catch (err) {
-            this.view.printError(err);
+            this.view.printMessage(err, 0);
         }
     }
 
@@ -51,7 +53,7 @@ class Controller {
             let category = this.store.delCategory(id);
             this.view.delCategory(category);
         } catch (err) {
-            this.view.printError(err);
+            this.view.printMessage(err, 0);
         }
     }
 
