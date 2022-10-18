@@ -61,21 +61,7 @@ class Store  {
     }
 
     addProduct(payload) {
-        if (!payload.name) {
-            throw 'El producto debe tener un nombre';
-        }
-
-        if (!payload.category) {
-            throw 'El producto debe tener una categoría';
-        }
-
-        this.getCategoryById(payload.category);
-        this.verificarNumFloat(payload.price);
-
-        if (payload.units) {
-            this.verificarNumEntero(payload.units);
-        }
-
+        payload = this.verifyProduct(payload);
         let product = new Product (
                 this.getNextId(this.products),
                 payload.name,
@@ -85,6 +71,20 @@ class Store  {
         )
         this.products.push(product);
         return product;
+    }
+
+    modProduct(payload) {
+        payload = this.verifyProduct(payload);
+        let index = this.products.findIndex(item => item.id === payload.id);
+        this.products[index].name = payload.name;
+        this.products[index].price = payload.price;
+        this.products[index].category = payload.category;
+        this.products[index].units = payload.units;
+        return this.products[index];
+    }
+
+    modUnitsPorduct(id, newUnits) {
+        this.getProductById(id).units = newUnits;
     }
 
     delCategory(id) {
@@ -158,6 +158,24 @@ class Store  {
             throw `'${numero}' no es un número positivo.`;
         }
         return numero;
+    }
+
+    verifyProduct(payload) {
+        if (!payload.name || payload.name.trim().length === 0) {
+            throw 'El producto debe tener un nombre';
+        }
+
+        if (!payload.category) {
+            throw 'El producto debe tener una categoría';
+        }
+
+        this.getCategoryById(payload.category);
+        this.verificarNumFloat(payload.price);
+
+        if (payload.units) {
+            this.verificarNumEntero(payload.units);
+        }
+        return payload;
     }
 
     init() {
