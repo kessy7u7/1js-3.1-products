@@ -56,6 +56,10 @@ class Store  {
         return product;
     }
 
+    isNameProductExists(id, name) {
+        return this.products.some(product => product.name === name && product.id != id);
+    }
+
     getProductsByCategory(id) {
         return this.products.filter(product => product.category === id);
     }

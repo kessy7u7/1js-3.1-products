@@ -102,6 +102,7 @@ class View {
     setAddProductForm() {
         productFormUI.querySelector('legend').textContent = 'Añadir producto';
         productFormUI.querySelector('button[type="submit"]').textContent = 'Añadir';
+        productFormUI.querySelectorAll('.error').forEach(span => span.textContent = '');
         productFormUI.reset();
     }
 

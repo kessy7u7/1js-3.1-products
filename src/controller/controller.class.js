@@ -18,6 +18,7 @@ class Controller {
         this.view.renderImport(this.store.totalImport());
         this.view.setButtonResetProductForm();
         this.view.setMenu();
+        this.setProductFormValidator();
     }
 
     addProductToStore(payload) {
@@ -130,6 +131,46 @@ class Controller {
             productRowUI.children[3].textContent = product.units;
             productRowUI.children[5].textContent = product.productImport().toFixed(2) + " €";
             this.view.renderImport(this.store.totalImport());
+        });
+    }
+
+    setProductFormValidator() {
+        const prodId = document.getElementById('newprod-id');
+
+        const prodName = document.getElementById('newprod-name');
+        prodName.addEventListener('blur', () => {
+            prodName.setCustomValidity('');
+            if (this.store.isNameProductExists(prodId.value, prodName.value)) {
+                prodName.setCustomValidity('El nombre ya existe.');
+            }
+            prodName.nextElementSibling.textContent = prodName.validationMessage;
+        });
+
+        const prodCat = document.getElementById('newprod-cat');
+        prodCat.addEventListener('blur', () => {
+            prodCat.nextElementSibling.textContent = prodCat.validationMessage;
+        });
+
+        const prodUnits = document.getElementById('newprod-units');
+        prodUnits.addEventListener('blur', () => {
+            prodUnits.nextElementSibling.textContent = prodUnits.validationMessage;
+        });
+
+        const prodPrice = document.getElementById('newprod-price');
+        prodPrice.addEventListener('blur', () => {
+            prodPrice.nextElementSibling.textContent = prodPrice.validationMessage;
+        });
+
+        document.getElementById('new-prod').addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            prodName.nextElementSibling.textContent = prodName.validationMessage;
+
+            prodCat.nextElementSibling.textContent = prodCat.validationMessage;
+
+            prodUnits.nextElementSibling.textContent = prodUnits.validationMessage;
+
+            prodPrice.nextElementSibling.textContent = prodPrice.validationMessage;
         });
     }
 
