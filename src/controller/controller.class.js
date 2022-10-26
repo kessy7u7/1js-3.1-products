@@ -160,18 +160,17 @@ class Controller {
         prodPrice.addEventListener('blur', () => {
             prodPrice.nextElementSibling.textContent = prodPrice.validationMessage;
         });
+    }
 
-        document.getElementById('new-prod').addEventListener('submit', (event) => {
-            event.preventDefault();
+    productFormValid() {
+        const inputs = ['newprod-name', 'newprod-cat', 'newprod-units', 'newprod-price'];
 
-            prodName.nextElementSibling.textContent = prodName.validationMessage;
-
-            prodCat.nextElementSibling.textContent = prodCat.validationMessage;
-
-            prodUnits.nextElementSibling.textContent = prodUnits.validationMessage;
-
-            prodPrice.nextElementSibling.textContent = prodPrice.validationMessage;
+        inputs.forEach(inputId => {
+            const input = document.getElementById(inputId);
+            input.nextElementSibling.textContent = input.validationMessage;
         });
+
+        return document.getElementById('new-pord').checkValidity();
     }
 
 }

@@ -10,7 +10,7 @@ window.addEventListener('load', () => {
   document.getElementById('new-prod').addEventListener('submit', (event) => {
     event.preventDefault();
 
-    if (!event.currentTarget.checkValidity()) {
+    if (!myController.productFormValid()) {
       return;
     }
 
