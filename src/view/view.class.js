@@ -8,17 +8,21 @@ const tBodyProductsUI = tableProductsUI.querySelector('tbody');
 const selectCategoryUI = document.getElementById('newprod-cat');
 const tBodyCategoriesUI = tableCategoiesUI.querySelector('tbody');
 const importeTotalUI = document.getElementById('importe-total');
-const aboutUsUI = document.getElementById('about-us');
-const menuUI = document.querySelector('#navbarNavAltMarkup .navbar-nav');
 
 class View {
+    init() {
+        this.setButtonResetProductForm();
+        document.querySelectorAll('.navbar-nav a.nav-link').forEach((navItem) => navItem
+        .addEventListener('click', this.showDiv))
+    }
+
     renderNewProduct(product) {
         const productUI = document.createElement('tr');
         productUI.setAttribute('id', `prod-${product.id}`);
         productUI.innerHTML = `
             <td>${product.id}</td>
             <td>${product.name}</td>
-            <td>${product.category}</td>
+            <td>${product.category.name}</td>
             <td>${product.units}</td>
             <td>${product.price.toFixed(2)} €/u</td>
             <td>${product.productImport().toFixed(2)} €</td>
@@ -33,7 +37,7 @@ class View {
         const productUI = document.getElementById(`prod-${product.id}`);
         this.editButtonSubUnit(product.id, product.units);
         productUI.children[1].textContent = product.name;
-        productUI.children[2].textContent = product.category;
+        productUI.children[2].textContent = product.category.name;
         productUI.children[3].textContent = product.units;
         productUI.children[4].textContent = product.price.toFixed(2) + " €/u";
         productUI.children[5].textContent = product.productImport().toFixed(2) + " €";
@@ -55,7 +59,11 @@ class View {
             <td>${category.id}</td>
             <td>${category.name}</td>
             <td>${category.description}</td>
-            <td></td>
+            <td>
+                <button class="btn btn-danger del-cat">
+                    <span class="material-icons">delete</span>
+                </button>
+            </td>
         `
         tBodyCategoriesUI.appendChild(categoryRowUI);
 
@@ -64,11 +72,12 @@ class View {
 
     delProduct(product) {
         document.getElementById(`prod-${product.id}`).remove();
+        this.setAddProductForm();
     }
 
     delCategory(category) {
         document.getElementById(`cat-${category.id}`).remove();
-        this.printMessage(`Ha sido eliminada la categoría: '${category.name}'`, 2);
+        selectCategoryUI.querySelector(`option[value="${category.id}"]`).remove();
     }
 
     printMessage(message, type = 1) {
@@ -110,10 +119,11 @@ class View {
         productFormUI.querySelector('legend').textContent = 'Modificar producto';
         productFormUI.querySelector('#newprod-id').value = product.id;
         productFormUI.querySelector('#newprod-name').value = product.name;
-        productFormUI.querySelector('#newprod-cat').value = product.category;
+        productFormUI.querySelector('#newprod-cat').value = product.category.id;
         productFormUI.querySelector('#newprod-units').value = product.units;
         productFormUI.querySelector('#newprod-price').value = product.price.toFixed(2);
         productFormUI.querySelector('button[type="submit"]').textContent = 'Modificar';
+        productFormUI.querySelectorAll('.error').forEach(span => span.textContent = '')
     }
 
     setButtons() {
@@ -142,44 +152,15 @@ class View {
         }
     }
 
-    setMenu() {        
-        menuUI.children[0].addEventListener('click', this.mostrarTablaProductos);
+    showDiv(event) {
+        event.preventDefault()
 
-        menuUI.children[1].addEventListener('click', this.mostrarTablaCategorias);
-        
-        menuUI.children[2].addEventListener('click', () => {
-            this.mostrarProductForm();
-            this.setAddProductForm();
-        });
-        
-        menuUI.children[3].addEventListener('click', this.mostrarCategoryForm);
+        document.querySelector('a.nav-link.active').classList.remove('active') ;
+        event.currentTarget.classList.add('active');
 
-        menuUI.children[4].addEventListener('click', this.mostrarAboutUs);
-    }
-
-    mostrarTablaProductos() {
-        document.querySelector('.visible').classList.replace('visible', 'oculto');        
-        tableProductsUI.classList.replace('oculto', 'visible');
-    }
-
-    mostrarTablaCategorias() {
-        document.querySelector('.visible').classList.replace('visible', 'oculto');        
-        tableCategoiesUI.classList.replace('oculto', 'visible');
-    }
-
-    mostrarProductForm() {
-        document.querySelector('.visible').classList.replace('visible', 'oculto');
-        productFormUI.classList.replace('oculto', 'visible');
-    }
-
-    mostrarCategoryForm() {
-        document.querySelector('.visible').classList.replace('visible', 'oculto');        
-        categoryFormUI.classList.replace('oculto', 'visible');
-    }
-
-    mostrarAboutUs() {
-        document.querySelector('.visible').classList.replace('visible', 'oculto');
-        aboutUsUI.classList.replace('oculto', 'visible');
+        const zoneDivs = ['almacen', 'categories', 'new-prod', 'new-cat', 'about-us'];
+        zoneDivs.forEach(div => document.getElementById(div).classList.add('oculto'));
+        document.getElementById(event.currentTarget.getAttribute('data-div')).classList.remove('oculto');
     }
 
 }

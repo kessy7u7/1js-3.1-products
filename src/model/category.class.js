@@ -8,6 +8,10 @@ class Category {
         this.name = name;
         this.description = description;
     }
+
+    static parse(object) {
+        return new Category(object.id, object.name, object.description);
+    }
 }
 
 module.exports = Category

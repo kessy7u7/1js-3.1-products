@@ -2,7 +2,7 @@
 
 const Category = require('./category.class');
 const Product = require('./product.class');
-const Dades = require('../datosIni.json');
+const SERVER = 'http://localhost:3000';
 
 // Aquí la clase Store
 
@@ -30,18 +30,29 @@ class Store  {
         return category;
     }
 
-    addCategory(nombre, descripcion) {
+    async addCategory(nombre, descripcion) {
         if (!nombre) {
             throw 'Debes de introducir un nombre';
         }
         try {
             this.getCategoryByName(nombre);
         } catch {
-            let category = new Category (
-                this.getNextId(this.categories), 
-                nombre, 
-                descripcion
-                );
+            const response = await fetch(SERVER + '/categories', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name: nombre,
+                    description: descripcion
+                }),
+                headers: {
+                    'Content-Type' : 'application/json'
+                }
+            });
+            if (!response.ok) {
+                throw `Error ${response.status}: Ha habido un problema con la petición`;
+            }
+            const object = await response.json();
+
+            let category = Category.parse(object);
             this.categories.push(category);
             return category;
         }
@@ -61,51 +72,92 @@ class Store  {
     }
 
     getProductsByCategory(id) {
-        return this.products.filter(product => product.category === id);
+        return this.products.filter(product => product.category.id === id);
     }
 
-    addProduct(payload) {
+    async addProduct(payload) {
         payload = this.verifyProduct(payload);
-        let product = new Product (
-                this.getNextId(this.products),
-                payload.name,
-                payload.category,
-                payload.price,
-                payload.units
-        )
+        const response = await fetch(SERVER + '/products', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: {
+                'Content-Type' : 'application/json'
+            }
+        });
+        if (!response.ok) {
+            throw `Error ${response.status}: Ha habido un problema con la petición`;
+        }
+        const object = await response.json();
+
+        let product = Product.parse(object);
+        product.category = this.getCategoryById(object.category);
         this.products.push(product);
         return product;
     }
 
-    modProduct(payload) {
+    async modProduct(payload) {
         payload = this.verifyProduct(payload);
-        let index = this.products.findIndex(item => item.id === payload.id);
-        this.products[index].name = payload.name;
-        this.products[index].price = payload.price;
-        this.products[index].category = payload.category;
-        this.products[index].units = payload.units;
-        return this.products[index];
+        const response = await fetch(SERVER + '/products/' + payload.id, {
+            method: 'PATCH',
+            body: JSON.stringify(payload),
+            headers: {
+                'Content-Type' : 'application/json'
+            }
+        });
+        if (!response.ok) {
+            throw `Error ${response.status}: Ha habido un problema con la petición`;
+        }
+        const object = await response.json();
+
+        const product = this.getProductById(object.id)
+        product.name = object.name;
+        product.price = object.price;
+        product.category = this.getCategoryById(object.category);
+        product.units = object.units;
+        return product;
     }
 
-    modUnitsPorduct(id, newUnits) {
-        this.getProductById(id).units = newUnits;
+    async modUnitsPorduct(id, newUnits) {
+        const response = await fetch(SERVER + '/products/' + id, {
+            method: 'PATCH',
+            body: `{"units": ${newUnits}}`,
+            headers: {
+                'Content-Type' : 'application/json'
+            }
+        });
+        if (!response.ok) {
+            throw `Error ${response.status}: Ha habido un problema con la petición`;
+        }
+
+        const product = this.getProductById(id);
+        product.units = newUnits;
+        return product;
     }
 
-    delCategory(id) {
+    async delCategory(id) {
         let category = this.getCategoryById(id);
         let productsCategory = this.getProductsByCategory(id);
         if (productsCategory.length > 0) {
-            throw `La categoría '${id}' tiene productos.'`;
+            throw `La categoría ${id} tiene productos.`;
+        }
+        const response = await fetch(SERVER + '/categories/' + id, {
+            method: 'DELETE'
+        })
+        if (!response.ok) {
+            throw `Error ${response.status}: Ha habido un problema con la petición`;
         }
         let index = this.categories.indexOf(category);
         this.categories.splice(index, 1);
         return category;
     }
 
-    delProduct(id) {
+    async delProduct(id) {
         let product = this.getProductById(id);
-        if (product.units !== 0) {
-            throw `Aún quedan unidades del producto ${id}.`;
+        const response = await fetch(SERVER + '/products/' + id, {
+            method: 'DELETE'
+        })
+        if (!response.ok) {
+            throw `Error ${response.status}: Ha habido un problema con la petición`;
         }
         let index = this.products.indexOf(product);
         this.products.splice(index, 1);
@@ -132,10 +184,6 @@ class Store  {
         let string = `Almacén ${id} => ${this.products.length} productos: ${this.totalImport} €\n`;
         this.products.forEach((product) => string += `${product}\n`)
         return string
-    }
-
-    getNextId(array) {
-        return array.reduce((max, item) => (max > item.id) ? max : item.id, 0) + 1;
     }
 
     verificarNumEntero(numero) {
@@ -182,16 +230,27 @@ class Store  {
         return payload;
     }
 
-    init() {
-        let categories = Dades.categories;
+    async init() {
+        const [categories, products] = await Promise.all([
+            this.getTable('/categories'),
+            this.getTable('/products')
+        ]);
+
         categories.forEach(category => {
             this.categories.push(new Category(category.id, category.name, category.description));
         });
 
-        let products = Dades.products;
         products.forEach(product => {
-            this.products.push(new Product(product.id, product.name, product.category, product.price, product.units));
+            this.products.push(new Product(product.id, product.name, this.getCategoryById(product.category), product.price, product.units));
         });
+    }
+
+    async getTable(table) {
+        const response = await fetch(SERVER + table);
+        if (!response.ok) {
+            throw `Error ${response.status}: Ha habido un problema al cargar los datos, reinicie la página.`;
+        }        
+        return await response.json();
     }
 
 }
