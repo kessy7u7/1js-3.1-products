@@ -99,7 +99,7 @@ class View {
         messageUI.innerHTML = `${message}`;
         const divMessage = document.getElementById('messages');
         divMessage.appendChild(messageUI);
-        setTimeout(function() {
+        setTimeout(() => {
             messageUI.remove()
         }, 7000)
     }

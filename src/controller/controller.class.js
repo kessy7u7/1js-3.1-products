@@ -54,22 +54,20 @@ class Controller {
 
     async deleteProductFromStore(id) {
         let product = this.store.getProductById(id);
-        if (confirm(`¿Estás seguro que deseas borrar el producto "${product.name}"?`)) {
-            try {
+        try {
+            if (confirm(`¿Estás seguro que deseas borrar el producto "${product.name}"?`)) {
                 if (product.units !== 0) {
-                    throw `Aún quedan unidades del producto ${id}.`;
+                    if (!confirm(`Aún quedan unidades del producto ${id}. ¿Deseas continuar?`)) {
+                        return;
+                    }
                 }
                 await this.store.delProduct(id)
-            } catch (err) {
-                if (confirm(`${err} ¿Deseas continuar?`)) {
-                    await this.store.delProduct(id)
-                } else {
-                    return;
-                }
+                this.view.delProduct(product);
+                this.view.renderImport(this.store.totalImport());
+                this.view.printMessage(`Ha sido eliminado el producto: '${product.name}'`, 2);
             }
-            this.view.delProduct(product);
-            this.view.renderImport(this.store.totalImport());
-            this.view.printMessage(`Ha sido eliminado el producto: '${product.name}'`, 2);
+        } catch (err) {
+            this.view.printMessage(err, 0);
         }
     }
 
